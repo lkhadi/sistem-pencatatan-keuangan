@@ -140,6 +140,6 @@ class Transaksi extends Controller
         }elseif($request->tipe=='pengeluaran'){
             Pengeluaran::destroy($id);
         }
-        return redirect('transaksi');
+        return redirect('transaksi')->with('alert','Deleted!');
     }
 }

@@ -3,6 +3,11 @@
 
 @section('content')
 <h5 class="text-center">Daftar Transaksi {{$caption}}</h5>
+@if(session('alert'))
+<div class="alert alert-info">
+	{{session('alert')}}
+</div>
+@endif
 <div class="row">
 	<div class="col-md-9">
 		<form action="{{url('transaksi')}}" method="GET" class="form-inline">
