@@ -72,12 +72,7 @@ class Transaksi extends Controller
         return redirect('transaksi/create');
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
+
     public function edit(Request $request, $id)
     {
         $request->validate([
@@ -95,13 +90,6 @@ class Transaksi extends Controller
         return view('contents.transaksi.edit_transaksi',['title'=>'Edit Transaksi','transaksi'=>$transaksi,'tipe'=>$request->tipe,'kategori'=>$kategori]);
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function update(Request $request, $id)
     {
         $request->validate([
@@ -126,20 +114,24 @@ class Transaksi extends Controller
         return redirect('transaksi');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function destroy(Request $request, $id)
     {
         $request->validate(['tipe'=>'required']);
         if($request->tipe=='pemasukan'){
-            Pemasukan::destroy($id);
+            try{
+                Pemasukan::destroy($id);
+                $alert = 'Berhasil';
+            }catch(\Exception $e){
+                $alert = 'Gagal';
+            }
         }elseif($request->tipe=='pengeluaran'){
-            Pengeluaran::destroy($id);
+            try{
+                Pengeluaran::destroy($id);
+                $alert = 'Berhasil';
+            }catch(\Exception $e){
+                $alert = 'Gagal';
+            }
         }
-        return redirect('transaksi')->with('alert','Deleted!');
+        return redirect('transaksi')->with('alert',$alert);
     }
 }

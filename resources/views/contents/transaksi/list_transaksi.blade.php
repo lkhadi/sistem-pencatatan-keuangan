@@ -3,6 +3,7 @@
 
 @section('content')
 <h5 class="text-center">Daftar Transaksi {{$caption}}</h5>
+<hr>
 @if(session('alert'))
 <div class="alert alert-info">
 	{{session('alert')}}
