@@ -8,11 +8,7 @@ use App\Kategori_Pengeluaran as KPR;
 
 class Kategori extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
+
     public function index()
     {
         $list_kategori_pemasukan = KPM::all();
@@ -20,22 +16,24 @@ class Kategori extends Controller
         return view('contents.kategori.list_kategori',['list_kategori_pemasukan'=>$list_kategori_pemasukan,'list_kategori_pengeluaran'=>$list_kategori_pengeluaran,'title'=>'List Kategori']);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        return view('contents.kategori.form_kategori',['title'=>'Tambah Kategori']);
+    public function show(Request $request, $id){
+        try{
+            $request->validate([
+                'tipe' => 'required'
+            ]);
+            if($request->tipe=='pemasukan'){
+                $kategori = KPM::find($id);
+            }elseif($request->tipe=='pengeluaran'){
+                $kategori = KPR::find($id);
+            }else{
+                $kategori = false;
+            }
+            return $kategori;
+        }catch(\Exception $e){
+            return false;
+        }
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
     public function store(Request $request)
     {
         $validate = $request->validate([
@@ -52,37 +50,9 @@ class Kategori extends Controller
         $store->nama_kategori = $request->kategori;
         $store->deskripsi = $request->deskripsi;
         $store->save();
-        return redirect('kategori/create');
+        return redirect('kategori');
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Request $request, $id)
-    {
-        $validation = $request->validate([
-            'tipe'=>'required'
-        ]);
-        if($request->tipe=='pemasukan'){
-            $kategori = KPM::find($id);
-        }elseif($request->tipe=='pengeluaran'){
-            $kategori = KPR::find($id);
-        }else{
-            return redirect('kategori');
-        }
-        return view('contents.kategori.edit_kategori',['title'=>'Edit Kategori','kategori'=>$kategori,'tipe'=>$request->tipe]);
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function update(Request $request, $id)
     {
         $validate = $request->validate([
@@ -90,44 +60,42 @@ class Kategori extends Controller
             'kategori' => 'required',
             'deskripsi' => 'required'
         ]);
-        if($request->tipe=='pemasukan'){
-            $update = KPM::find($id);
-        }else{
-            $update = KPR::find($id);
-            
-        }
-        $update->nama_kategori = $request->kategori;
-        $update->deskripsi = $request->deskripsi;
-        $update->save();
-        return redirect('kategori');
+        try{
+            if($request->tipe=='pemasukan'){
+                $update = KPM::find($id);
+            }else{
+                $update = KPR::find($id);
+                
+            }
+            $update->nama_kategori = $request->kategori;
+            $update->deskripsi = $request->deskripsi;
+            $update->save();
+            $alert = "Berhasil";
+        }catch(\Exception $e){
+            $alert = "Gagal";
+        }        
+        return redirect('kategori')->with('alert',$alert);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
+
     public function destroy(Request $request, $id)
     {
         $validation = $request->validate([
             'tipe'=>'required'
         ]);
         if($request->tipe=='pemasukan'){
-            $cek = KPM::find($id)->pemasukan()->count();
-            if($cek==0){
+            try{
                 KPM::destroy($id);
                 $alert = 'Berhasil';
-            }else{
+            }catch(\Exception $e){
                 $alert = 'Gagal';
-            }       
+            }    
             return back()->with('alert',$alert);     
         }else{
-            $cek = KPR::find($id)->pengeluaran->count();
-            if($cek==0){
+            try{
                 KPR::destroy($id);
                 $alert = 'Berhasil';
-            }else{
+            }catch(\Exception $e){
                 $alert = 'Gagal';
             } 
             return back()->with('alert',$alert);           
