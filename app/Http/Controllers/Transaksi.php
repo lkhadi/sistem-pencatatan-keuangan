@@ -10,11 +10,7 @@ use App\Pengeluaran;
 
 class Transaksi extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
+
     public function index(Request $request)
     {   
         if($request->has('_token')){
@@ -29,27 +25,27 @@ class Transaksi extends Controller
         $total_masuk = Pemasukan::sum('pemasukan');
         $total_keluar = Pengeluaran::sum('pengeluaran');
         $saldo = $total_masuk - $total_keluar;
-        return view('contents.transaksi.list_transaksi',['title'=>'List Transaksi','saldo'=>$saldo,'pemasukan'=>$pemasukan,'pengeluaran'=>$pengeluaran,'caption'=>$caption]);
+        $kpm = KPM::all();
+        $kpr = KPR::all();
+        return view('contents.transaksi.list_transaksi',['title'=>'List Transaksi','saldo'=>$saldo,'pemasukan'=>$pemasukan,'pengeluaran'=>$pengeluaran,'caption'=>$caption,'kpm'=>$kpm,'kpr'=>$kpr]);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        $kategori_pemasukan = KPM::all();
-        $kategori_pengeluaran = KPR::all();
-        return view('contents.transaksi.form_transaksi',['title'=>'Tambah Transaksi','kategori_pemasukan'=>$kategori_pemasukan,'kategori_pengeluaran'=>$kategori_pengeluaran]);
+    public function show(Request $request, $id){
+        $request->validate(['tipe'=>'required']);
+        try{
+            if($request->tipe=='pemasukan'){
+                $response = Pemasukan::find($id);
+            }elseif($request->tipe=='pengeluaran'){
+                $response = Pengeluaran::find($id);
+            }else{
+                $response = false;
+            }
+            return $response;
+        }catch(\Exception $e){
+            return false;
+        }
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
     public function store(Request $request)
     {
         $validate = $request->validate([
@@ -58,36 +54,22 @@ class Transaksi extends Controller
             'nominal' => 'required',
             'deskripsi' => 'required'
         ]);
-
-        if($request->jenis_transaksi=='pemasukan'){
-            $store = new Pemasukan;
-            $store->pemasukan = $request->nominal;
-        }else{
-            $store = new Pengeluaran;
-            $store->pengeluaran = $request->nominal;
+        try{
+            if($request->jenis_transaksi=='pemasukan'){
+                $store = new Pemasukan;
+                $store->pemasukan = $request->nominal;
+            }else{
+                $store = new Pengeluaran;
+                $store->pengeluaran = $request->nominal;
+            }
+            $store->id_kategori = $request->kategori;
+            $store->deskripsi = $request->deskripsi;
+            $store->save();
+            $alert = "Berhasil";
+        }catch(\Exception $e){
+            $alert = "Gagal";
         }
-        $store->id_kategori = $request->kategori;
-        $store->deskripsi = $request->deskripsi;
-        $store->save();
-        return redirect('transaksi/create');
-    }
-
-
-    public function edit(Request $request, $id)
-    {
-        $request->validate([
-            'tipe'=>'required'
-        ]);
-        if($request->tipe=='pemasukan'){
-            $transaksi = Pemasukan::find($id);
-            $kategori = KPM::all();
-        }elseif($request->tipe=='pengeluaran'){
-            $transaksi = Pengeluaran::find($id);
-            $kategori = KPR::all();
-        }else{
-            return redirect('transaksi');
-        }
-        return view('contents.transaksi.edit_transaksi',['title'=>'Edit Transaksi','transaksi'=>$transaksi,'tipe'=>$request->tipe,'kategori'=>$kategori]);
+        return redirect('transaksi')->with('alert',$alert);
     }
 
     public function update(Request $request, $id)
@@ -98,20 +80,24 @@ class Transaksi extends Controller
             'deskripsi' => 'required',
             'nominal' => 'required'
         ]);
-
-        if($request->tipe=='pemasukan'){
-            $update = Pemasukan::find($id);
-            $update->pemasukan = $request->nominal;
-        }elseif($request->tipe=='pengeluaran'){
-            $update = Pengeluaran::find($id);
-            $update->pengeluaran = $request->nominal;
-        }else{
-            return redirect('transaksi');
-        }
-        $update->id_kategori = $request->kategori;
-        $update->deskripsi = $request->deskripsi;
-        $update->save();
-        return redirect('transaksi');
+        try{
+            if($request->tipe=='pemasukan'){
+                $update = Pemasukan::find($id);
+                $update->pemasukan = $request->nominal;
+            }elseif($request->tipe=='pengeluaran'){
+                $update = Pengeluaran::find($id);
+                $update->pengeluaran = $request->nominal;
+            }else{
+                return redirect('transaksi')->with('alert','Gagal');
+            }
+            $update->id_kategori = $request->kategori;
+            $update->deskripsi = $request->deskripsi;
+            $update->save();
+            $alert = 'Berhasil';
+        }catch(\Exception $e){
+            $alert = 'Gagal';
+        }        
+        return redirect('transaksi')->with('alert',$alert);
     }
 
     public function destroy(Request $request, $id)
