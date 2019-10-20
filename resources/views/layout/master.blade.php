@@ -24,13 +24,7 @@
 				<ul class="navbar-nav">
 					<li class="nav-item"><a class="nav-link" href="{{url('/')}}">Home</a></li>
 					<li class="nav-item"><a class="nav-link" href="{{url('kategori')}}">Kategori</a></li>
-					<li class="nav-item dropdown">
-						<a class="dropdown-toggle nav-link" data-toggle="dropdown" href="#">Transaksi</a>
-						<div class="dropdown-menu">
-							<a class="dropdown-item" href="{{url('transaksi')}}">List Transaksi</a>
-							<a class="dropdown-item" href="{{url('transaksi/create')}}">Tambah Transaksi</a>
-						</div>
-					</li>
+					<li class="nav-item"><a class="nav-link" href="{{url('transaksi')}}">Transaksi</a></li>
 				</ul>
 			</div>
 		</nav>

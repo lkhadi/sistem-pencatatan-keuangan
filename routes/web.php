@@ -13,4 +13,4 @@
 
 Route::get('/','Home@index');
 Route::resource('kategori', 'Kategori')->except(['create','edit']);
-Route::resource('transaksi', 'Transaksi');
+Route::resource('transaksi', 'Transaksi')->except(['create','edit']);

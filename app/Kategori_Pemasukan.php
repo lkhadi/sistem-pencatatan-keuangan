@@ -11,4 +11,5 @@ class Kategori_Pemasukan extends Model
    	public function pemasukan(){
    		return $this->hasMany('App\Pemasukan','id_kategori');
    	}
+   	
 }
